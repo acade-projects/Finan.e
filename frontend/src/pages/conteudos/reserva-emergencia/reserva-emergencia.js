@@ -1,60 +1,5 @@
-const questions = [
-    {
-        question: "O que é uma reserva de emergência?",
-        answers: [
-            "Um dinheiro guardado para cobrir imprevistos, como uma despesa médica ou a perda de renda.",
-            "Um valor separado para as compras de fim de ano.",
-            "Um investimento de risco para ganhar o máximo possível.",
-            "Um empréstimo que o banco deixa disponível."
-        ],
-        correct: 0,
-        explanation: "A reserva de emergência é um valor guardado para imprevistos, evitando que você precise recorrer a dívidas."
-    },
-    {
-        question: "Qual é a recomendação mais comum para o tamanho da reserva de emergência?",
-        answers: [
-            "O equivalente a 1 semana de gastos.",
-            "O equivalente a 3 a 6 meses de gastos essenciais.",
-            "Exatamente o valor do salário de um mês.",
-            "Todo o dinheiro que sobra no fim do mês."
-        ],
-        correct: 1,
-        explanation: "O mais comum é guardar de 3 a 6 meses de gastos essenciais, e quem tem renda variável costuma buscar um valor maior."
-    },
-    {
-        question: "Os gastos essenciais de uma pessoa são de R$ 1.200 por mês. Qual seria uma reserva de 6 meses?",
-        answers: [
-            "R$ 2.400",
-            "R$ 6.000",
-            "R$ 7.200",
-            "R$ 12.000"
-        ],
-        correct: 2,
-        explanation: "Multiplicando os gastos essenciais pelo número de meses: R$ 1.200 x 6 = R$ 7.200."
-    },
-    {
-        question: "Quais características a reserva de emergência deve ter?",
-        answers: [
-            "Alto risco e resgate somente após alguns anos.",
-            "Liquidez diária e baixo risco.",
-            "Rendimento muito alto, mesmo que o valor oscile bastante.",
-            "Ficar guardada em casa, sem render."
-        ],
-        correct: 1,
-        explanation: "A reserva precisa estar segura e disponível quando você precisar, por isso se busca liquidez diária e baixo risco."
-    },
-    {
-        question: "Qual destes é um exemplo de emergência que justifica usar a reserva?",
-        answers: [
-            "Uma promoção de celular novo.",
-            "Uma viagem de férias com os amigos.",
-            "Uma despesa médica inesperada.",
-            "A compra de roupas da moda."
-        ],
-        correct: 2,
-        explanation: "A reserva deve ser usada apenas em imprevistos reais, como uma despesa médica. Depois de usá-la, o ideal é repor o valor."
-    }
-];
+import { buscarPerguntas } from "../../../js/supabase.js";
+let questions = [];
 
 // Elementos da página
 
@@ -198,7 +143,7 @@ function restartQuiz() {
     showQuestion();
 }
 
-// menu-mobile.js — abre/fecha o menu hambúrguer das páginas de conteúdo
+// menu-mobile — abre/fecha o menu hambúrguer das páginas de conteúdo
 (function () {
   "use strict";
 
@@ -239,4 +184,16 @@ restartButton.addEventListener("click", restartQuiz);
 
 // Inicialização
 
-showQuestion();
+async function iniciar() {
+    try {
+        questions = await buscarPerguntas("reserva-emergencia");
+        if (questions.length === 0) throw new Error("Nenhuma pergunta encontrada");
+        showQuestion();
+    } catch (erro) {
+        console.error(erro);
+        questionTitle.textContent = "Não foi possível carregar as perguntas. Tente novamente mais tarde.";
+        nextButton.disabled = true;
+    }
+}
+
+iniciar();

@@ -1,65 +1,7 @@
-
-// ========================================
 // QUESTIONÁRIO SOBRE POUPANÇA
-// ========================================
 
-const questions = [
-    {
-        question: "O que significa poupar dinheiro?",
-        answers: [
-            "Gastar todo o dinheiro recebido.",
-            "Guardar uma parte do dinheiro para utilizar no futuro.",
-            "Pedir dinheiro emprestado frequentemente.",
-            "Comprar produtos sempre que possível."
-        ],
-        correct: 1,
-        explanation: "Poupar significa reservar uma parte do dinheiro para objetivos futuros ou imprevistos."
-    },
-    {
-        question: "Qual é uma das principais vantagens de criar o hábito de poupar?",
-        answers: [
-            "Aumentar as despesas mensais.",
-            "Eliminar todas as necessidades financeiras.",
-            "Ter recursos disponíveis para objetivos e imprevistos.",
-            "Evitar completamente qualquer tipo de trabalho."
-        ],
-        correct: 2,
-        explanation: "A poupança ajuda a construir uma reserva financeira e proporciona maior segurança."
-    },
-    {
-        question: "Qual atitude representa um bom planejamento financeiro?",
-        answers: [
-            "Gastar primeiro e pensar depois.",
-            "Ignorar os próprios gastos.",
-            "Comprar tudo o que deseja imediatamente.",
-            "Organizar as despesas e reservar uma quantia para poupar."
-        ],
-        correct: 3,
-        explanation: "Organizar as despesas permite identificar quanto dinheiro pode ser guardado."
-    },
-    {
-        question: "O que é uma reserva de emergência?",
-        answers: [
-            "Um dinheiro guardado para situações inesperadas.",
-            "Uma quantia destinada exclusivamente ao lazer.",
-            "Um empréstimo feito pelo banco.",
-            "Um dinheiro reservado para compras por impulso."
-        ],
-        correct: 0,
-        explanation: "A reserva de emergência serve para lidar com despesas inesperadas, como problemas de saúde ou perda de renda."
-    },
-    {
-        question: "É necessário ganhar muito dinheiro para começar a poupar?",
-        answers: [
-            "Sim, somente pessoas com salários altos conseguem poupar.",
-            "Não, é possível começar guardando pequenas quantias.",
-            "Sim, porque pequenas quantias não fazem diferença.",
-            "Não, mas é necessário deixar de pagar todas as despesas."
-        ],
-        correct: 1,
-        explanation: "O hábito de poupar pode começar com pequenas quantias, respeitando a realidade financeira de cada pessoa."
-    }
-];
+import { buscarPerguntas } from "../../../js/supabase.js";
+let questions = [];
 
 // Elementos da página
 
@@ -203,7 +145,7 @@ function restartQuiz() {
     showQuestion();
 }
 
-// menu-mobile.js — abre/fecha o menu hambúrguer das páginas de conteúdo
+// menu-mobile — abre/fecha o menu hambúrguer das páginas de conteúdo
 (function () {
   "use strict";
 
@@ -242,6 +184,18 @@ function restartQuiz() {
 nextButton.addEventListener("click", nextQuestion);
 restartButton.addEventListener("click", restartQuiz);
 
-// Inicialização
+// Inicialização: carrega as perguntas do Supabase e inicia o questionário
 
-showQuestion();
+async function iniciar() {
+    try {
+        questions = await buscarPerguntas("poupanca");
+        if (questions.length === 0) throw new Error("Nenhuma pergunta encontrada");
+        showQuestion();
+    } catch (erro) {
+        console.error(erro);
+        questionTitle.textContent = "Não foi possível carregar as perguntas. Tente novamente mais tarde.";
+        nextButton.disabled = true;
+    }
+}
+
+iniciar();

@@ -1,64 +1,5 @@
-// ========================================
-// QUESTIONÁRIO SOBRE JUROS
-// ========================================
-
-const questions = [
-    {
-        question: "O que são juros?",
-        answers: [
-            "Um desconto dado em compras à vista.",
-            "Uma taxa cobrada apenas por bancos digitais.",
-            "O valor cobrado ou recebido pelo uso do dinheiro ao longo do tempo.",
-            "Um imposto pago ao governo sobre o salário."
-        ],
-        correct: 2,
-        explanation: "Juros são o valor pago ou recebido pelo uso do dinheiro durante um período de tempo."
-    },
-    {
-        question: "Um capital de R$ 1.000 rende juros simples de 2% ao mês. Quanto de juros será acumulado após 3 meses?",
-        answers: [
-            "R$ 20,00",
-            "R$ 60,00",
-            "R$ 61,21",
-            "R$ 120,00"
-        ],
-        correct: 1,
-        explanation: "Nos juros simples, os 2% incidem sempre sobre os R$ 1.000: R$ 20 por mês, ou R$ 60 em três meses."
-    },
-    {
-        question: "O que caracteriza os juros compostos?",
-        answers: [
-            "Os juros são sempre calculados apenas sobre o valor inicial.",
-            "Os juros deixam de ser cobrados depois do primeiro mês.",
-            "O valor dos juros nunca muda ao longo do tempo.",
-            "Os juros incidem sobre o valor inicial somado aos juros já acumulados."
-        ],
-        correct: 3,
-        explanation: "Nos juros compostos, os juros de cada período entram na base de cálculo do período seguinte, o chamado juros sobre juros."
-    },
-    {
-        question: "O que costuma acontecer com uma dívida com juros compostos que não é paga?",
-        answers: [
-            "Ela cresce cada vez mais rápido com o passar do tempo.",
-            "Ela permanece sempre com o mesmo valor.",
-            "Ela diminui sozinha com o tempo.",
-            "Ela é cancelada automaticamente depois de alguns meses."
-        ],
-        correct: 0,
-        explanation: "Como os juros incidem também sobre os juros acumulados, quanto mais tempo a dívida fica em aberto, maior ela tende a ficar."
-    },
-    {
-        question: "Em qual situação os juros trabalham a seu favor?",
-        answers: [
-            "Quando você paga uma fatura do cartão de crédito com atraso.",
-            "Quando você faz um empréstimo com taxa alta.",
-            "Quando você investe ou aplica seu dinheiro e recebe rendimentos.",
-            "Quando você parcela uma compra com acréscimo no valor final."
-        ],
-        correct: 2,
-        explanation: "Ao investir, você recebe juros pelo dinheiro aplicado, e o tempo ajuda o valor a crescer."
-    }
-];
+import { buscarPerguntas } from "../../../js/supabase.js";
+let questions = [];
 
 // Elementos da página
 
@@ -202,7 +143,7 @@ function restartQuiz() {
     showQuestion();
 }
 
-// menu-mobile.js — abre/fecha o menu hambúrguer das páginas de conteúdo
+// menu-mobile — abre/fecha o menu hambúrguer das páginas de conteúdo
 (function () {
   "use strict";
 
@@ -241,6 +182,18 @@ function restartQuiz() {
 nextButton.addEventListener("click", nextQuestion);
 restartButton.addEventListener("click", restartQuiz);
 
-// Inicialização
+// Inicialização: carrega as perguntas do Supabase e inicia o questionário
 
-showQuestion();
+async function iniciar() {
+    try {
+        questions = await buscarPerguntas("juros");
+        if (questions.length === 0) throw new Error("Nenhuma pergunta encontrada");
+        showQuestion();
+    } catch (erro) {
+        console.error(erro);
+        questionTitle.textContent = "Não foi possível carregar as perguntas. Tente novamente mais tarde.";
+        nextButton.disabled = true;
+    }
+}
+
+iniciar();
