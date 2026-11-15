@@ -1,64 +1,5 @@
-// ========================================
-// QUESTIONÁRIO SOBRE CRÉDITO
-// ========================================
-
-const questions = [
-    {
-        question: "O que é crédito?",
-        answers: [
-            "Dinheiro que você recebe de presente sem precisar devolver.",
-            "A possibilidade de usar um dinheiro agora e pagá-lo no futuro.",
-            "Um tipo de poupança com rendimento garantido.",
-            "Um desconto dado em compras à vista."
-        ],
-        correct: 1,
-        explanation: "Crédito é usar um recurso que ainda não é seu, com o compromisso de pagar depois."
-    },
-    {
-        question: "O que são juros?",
-        answers: [
-            "O valor cobrado pelo uso do dinheiro emprestado.",
-            "Um prêmio dado a quem paga as contas em dia.",
-            "Uma taxa cobrada apenas em compras à vista.",
-            "O valor que o banco guarda para o cliente."
-        ],
-        correct: 0,
-        explanation: "Os juros são o preço do crédito: quanto maior a taxa e o prazo, mais se paga no total."
-    },
-    {
-        question: "Qual atitude ajuda a evitar o endividamento?",
-        answers: [
-            "Usar todo o limite do cartão todo mês.",
-            "Parcelar tudo para a parcela caber no bolso.",
-            "Pagar apenas o valor mínimo da fatura.",
-            "Verificar se a parcela cabe no orçamento antes de contratar."
-        ],
-        correct: 3,
-        explanation: "Comparar a parcela com a renda antes de contratar evita assumir dívidas que não dá para pagar."
-    },
-    {
-        question: "O que costuma acontecer ao pagar apenas o valor mínimo da fatura do cartão?",
-        answers: [
-            "A dívida é quitada normalmente, sem custo extra.",
-            "O saldo restante gera juros altos e a dívida pode crescer.",
-            "O banco devolve parte do valor no mês seguinte.",
-            "O limite do cartão aumenta automaticamente."
-        ],
-        correct: 1,
-        explanation: "O valor que não foi pago entra no crédito rotativo, que costuma ter juros muito altos."
-    },
-    {
-        question: "Para que serve o score de crédito?",
-        answers: [
-            "Para calcular o saldo da conta bancária.",
-            "Para definir o valor do salário do cliente.",
-            "Para indicar o histórico de pagamentos e ajudar na análise de crédito.",
-            "Para aumentar automaticamente o limite do cartão."
-        ],
-        correct: 2,
-        explanation: "O score resume o comportamento de pagamento e pesa na decisão de quem concede o crédito."
-    }
-];
+import { buscarPerguntas } from "../../../js/supabase.js";
+let questions = [];
 
 // Elementos da página
 
@@ -202,7 +143,7 @@ function restartQuiz() {
     showQuestion();
 }
 
-// menu-mobile.js — abre/fecha o menu hambúrguer das páginas de conteúdo
+// menu-mobile — abre/fecha o menu hambúrguer das páginas de conteúdo
 (function () {
   "use strict";
 
@@ -241,6 +182,16 @@ function restartQuiz() {
 nextButton.addEventListener("click", nextQuestion);
 restartButton.addEventListener("click", restartQuiz);
 
-// Inicialização
+async function iniciar() {
+    try {
+        questions = await buscarPerguntas("credito");
+        if (questions.length === 0) throw new Error("Nenhuma pergunta encontrada");
+        showQuestion();
+    } catch (erro) {
+        console.error(erro);
+        questionTitle.textContent = "Não foi possível carregar as perguntas. Tente novamente mais tarde.";
+        nextButton.disabled = true;
+    }
+}
 
-showQuestion();
+iniciar();

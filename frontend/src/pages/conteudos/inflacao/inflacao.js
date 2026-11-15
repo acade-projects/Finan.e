@@ -1,60 +1,5 @@
-const questions = [
-    {
-        question: "O que é inflação?",
-        answers: [
-            "A queda geral dos preços de produtos e serviços.",
-            "O aumento generalizado e contínuo dos preços ao longo do tempo.",
-            "Um imposto cobrado sobre as compras.",
-            "O valor que o banco paga pelo dinheiro guardado."
-        ],
-        correct: 1,
-        explanation: "Inflação é o aumento generalizado e contínuo dos preços de produtos e serviços, o que faz o dinheiro comprar menos."
-    },
-    {
-        question: "Se a inflação é de 10% no ano e o seu salário não muda, o que acontece com o seu poder de compra?",
-        answers: [
-            "Ele aumenta, porque os preços estão maiores.",
-            "Ele permanece exatamente o mesmo.",
-            "Ele diminui, porque o mesmo salário compra menos.",
-            "Ele deixa de existir."
-        ],
-        correct: 2,
-        explanation: "Com os preços subindo e o salário parado, o mesmo valor compra uma quantidade menor de produtos e serviços."
-    },
-    {
-        question: "Uma compra custava R$ 100,00 e os preços subiram 5%. Quanto ela passa a custar?",
-        answers: [
-            "R$ 95,00",
-            "R$ 100,05",
-            "R$ 105,00",
-            "R$ 150,00"
-        ],
-        correct: 2,
-        explanation: "Um aumento de 5% sobre R$ 100 equivale a R$ 5, então a compra passa a custar R$ 105."
-    },
-    {
-        question: "Qual índice mede a inflação oficial no Brasil?",
-        answers: [
-            "IPCA",
-            "Selic",
-            "CDI",
-            "Poupança"
-        ],
-        correct: 0,
-        explanation: "O IPCA, calculado pelo IBGE, é o índice usado como medida oficial da inflação no Brasil."
-    },
-    {
-        question: "Para o dinheiro guardado não perder valor com o tempo, o que é importante?",
-        answers: [
-            "Deixá-lo parado em casa, sem render.",
-            "Gastar tudo o quanto antes.",
-            "Escolher aplicações que rendam acima da inflação.",
-            "Ignorar a variação dos preços."
-        ],
-        correct: 2,
-        explanation: "Se o rendimento for menor que a inflação, o dinheiro perde poder de compra. O ideal é buscar aplicações que rendam acima dela."
-    }
-];
+import { buscarPerguntas } from "../../../js/supabase.js";
+let questions = [];
 
 // Elementos da página
 
@@ -237,6 +182,18 @@ function restartQuiz() {
 nextButton.addEventListener("click", nextQuestion);
 restartButton.addEventListener("click", restartQuiz);
 
-// Inicialização
+// Inicialização: carrega as perguntas do Supabase e inicia o questionário
 
-showQuestion();
+async function iniciar() {
+    try {
+        questions = await buscarPerguntas("inflacao");
+        if (questions.length === 0) throw new Error("Nenhuma pergunta encontrada");
+        showQuestion();
+    } catch (erro) {
+        console.error(erro);
+        questionTitle.textContent = "Não foi possível carregar as perguntas. Tente novamente mais tarde.";
+        nextButton.disabled = true;
+    }
+}
+
+iniciar();
