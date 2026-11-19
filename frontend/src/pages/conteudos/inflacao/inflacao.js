@@ -1,5 +1,42 @@
+
 import { buscarPerguntas } from "../../../js/supabase.js";
+
 let questions = [];
+
+// Embaralha um array utilizando Fisher-Yates
+function embaralhar(array) {
+    const resultado = [...array];
+
+    for (let i = resultado.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [resultado[i], resultado[j]] = [resultado[j], resultado[i]];
+    }
+
+    return resultado;
+}
+
+// Seleciona 2 fáceis, 2 intermediárias e 1 difícil
+function sortearPerguntas(perguntas) {
+    const faceis = perguntas.filter(q => q.difficulty === "facil");
+    const intermediarias = perguntas.filter(q => q.difficulty === "intermediario");
+    const dificeis = perguntas.filter(q => q.difficulty === "dificil");
+
+    if (
+        faceis.length < 2 ||
+        intermediarias.length < 2 ||
+        dificeis.length < 1
+    ) {
+        throw new Error("Quantidade insuficiente de perguntas por dificuldade.");
+    }
+
+    const selecionadas = [
+        ...embaralhar(faceis).slice(0, 2),
+        ...embaralhar(intermediarias).slice(0, 2),
+        ...embaralhar(dificeis).slice(0, 1)
+    ];
+
+    return embaralhar(selecionadas);
+}
 
 // Elementos da página
 
@@ -130,51 +167,45 @@ function showResult() {
     questionCounter.textContent = "Questionário concluído";
 }
 
-// Reinicia o questionário
+// Reinicia o questionário com novas perguntas
 
-function restartQuiz() {
-    currentQuestion = 0;
-    score = 0;
-    answered = false;
-
+async function restartQuiz() {
     quizForm.hidden = false;
     quizResult.hidden = true;
 
-    showQuestion();
+    await iniciar();
 }
 
-// menu-mobile.js — abre/fecha o menu hambúrguer das páginas de conteúdo
+// Menu mobile — abre/fecha o menu hambúrguer
+
 (function () {
-  "use strict";
+    "use strict";
 
-  const menuButton = document.getElementById("mobile-menu-button");
-  const mobileNav = document.getElementById("mobile-navigation");
-  if (!menuButton || !mobileNav) return;
+    const menuButton = document.getElementById("mobile-menu-button");
+    const mobileNav = document.getElementById("mobile-navigation");
 
-  // Atualiza o estado do botão (o CSS abre o painel por aria-expanded)
-  function setMenu(open) {
-    menuButton.setAttribute("aria-expanded", String(open));
-    menuButton.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
-  }
+    if (!menuButton || !mobileNav) return;
 
-  menuButton.addEventListener("click", () => {
-    setMenu(menuButton.getAttribute("aria-expanded") !== "true");
-  });
+    function setMenu(open) {
+        menuButton.setAttribute("aria-expanded", String(open));
+        menuButton.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+    }
 
-  // Fecha ao clicar em qualquer link do menu
-  mobileNav.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => setMenu(false));
-  });
+    menuButton.addEventListener("click", () => {
+        setMenu(menuButton.getAttribute("aria-expanded") !== "true");
+    });
 
-  // Fecha com Esc
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") setMenu(false);
-  });
+    mobileNav.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", () => setMenu(false));
+    });
 
-  // Fecha ao voltar para a tela grande
-  window.matchMedia("(min-width: 901px)").addEventListener("change", (event) => {
-    if (event.matches) setMenu(false);
-  });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") setMenu(false);
+    });
+
+    window.matchMedia("(min-width: 901px)").addEventListener("change", event => {
+        if (event.matches) setMenu(false);
+    });
 })();
 
 // Eventos
@@ -182,16 +213,30 @@ function restartQuiz() {
 nextButton.addEventListener("click", nextQuestion);
 restartButton.addEventListener("click", restartQuiz);
 
-// Inicialização: carrega as perguntas do Supabase e inicia o questionário
+// Inicialização
 
 async function iniciar() {
     try {
-        questions = await buscarPerguntas("inflacao");
-        if (questions.length === 0) throw new Error("Nenhuma pergunta encontrada");
+        const perguntas = await buscarPerguntas("inflacao");
+
+        if (perguntas.length === 0) {
+            throw new Error("Nenhuma pergunta encontrada.");
+        }
+
+        questions = sortearPerguntas(perguntas);
+
+        currentQuestion = 0;
+        score = 0;
+        answered = false;
+
         showQuestion();
+
     } catch (erro) {
         console.error(erro);
-        questionTitle.textContent = "Não foi possível carregar as perguntas. Tente novamente mais tarde.";
+
+        questionTitle.textContent =
+            "Não foi possível carregar as perguntas. Tente novamente mais tarde.";
+
         nextButton.disabled = true;
     }
 }
