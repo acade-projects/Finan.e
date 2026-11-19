@@ -9,7 +9,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export async function buscarPerguntas(tema) {
   const { data, error } = await supabase
     .from("quiz_questions")
-    .select("question, answers, correct_index, explanation")
+    .select("question, answers, correct_index, explanation, difficulty")
     .eq("topic", tema)
     .order("position");
 
@@ -20,5 +20,6 @@ export async function buscarPerguntas(tema) {
     answers: q.answers,
     correct: q.correct_index,
     explanation: q.explanation,
+    difficulty: q.difficulty,
   }));
 }
